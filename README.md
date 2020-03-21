@@ -63,16 +63,30 @@ IS_OFFLINE=1 sls offline start
 
 To invoke individual functions:
 ```sh
-IS_OFFLINE=1 sls invoke local -f createRustat -d '{ "body": { "key": "lunch", "message": "LUNCH", "username": "nikki" } }'
+IS_OFFLINE=1 sls invoke local -f createRustat --path sample.rustat.payload.json
 # (snip)
 # Sample response:
 {
     "statusCode": 200,
-    "body": "{\"message\":\"Successfully created lunch for nikki\"}"
+    "headers": {
+        "Access-Control-Allow-Credentials": true,
+        "Access-Control-Allow-Origin": "*",
+        "Content-Type": "application/json"
+    },
+    "body": {
+        "message": "Successfully created lunch for rusi"
+    }
 }
 
 # or
-npm run invoke:local -- createRustat -d '{ "body": { "key": "lunch", "message": "LUNCH", "username": "nikki" } }'
+npm run invoke:local -- createRustat --path sample.rustat.payload.json
+```
+
+where `sample.rustat.payload.json` contains:
+```js
+{
+  "body": "{ \"key\": \"lunch\", \"message\": \"BURGER\", \"username\": \"rusi\" }"
+}
 ```
 
 ### DynamoDB data model
