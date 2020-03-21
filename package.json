@@ -1,0 +1,52 @@
+{
+  "name": "slack-rustat",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Slack bot for pre-defined fancy status messages",
+  "author": "Nikki Erwin Ramirez <necramirez@gmail.com>",
+  "license": "MIT",
+  "main": "handler.js",
+  "scripts": {
+    "invoke:local": "IS_OFFLINE=1 serverless invoke local -f",
+    "lint": "tsc --noEmit && eslint '*/**/*.{js,ts,tsx}' --quiet --fix",
+    "start:dev": "IS_OFFLINE=1 serverless offline start",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@slack/bolt": "^1.8.0",
+    "aws-sdk": "^2.643.0",
+    "source-map-support": "^0.5.10"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.17",
+    "@types/node": "^10.12.18",
+    "@typescript-eslint/eslint-plugin": "^2.24.0",
+    "@typescript-eslint/parser": "^2.24.0",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.10.0",
+    "eslint-plugin-prettier": "^3.1.2",
+    "fork-ts-checker-webpack-plugin": "^3.0.1",
+    "husky": "^4.2.3",
+    "lint-staged": "^10.0.8",
+    "prettier": "^1.19.1",
+    "serverless-dotenv-plugin": "^2.3.2",
+    "serverless-dynamodb-local": "^0.2.39",
+    "serverless-offline": "^6.0.0",
+    "serverless-webpack": "^5.2.0",
+    "ts-loader": "^5.3.3",
+    "typescript": "^3.2.4",
+    "webpack": "^4.29.0",
+    "webpack-node-externals": "^1.7.2"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js,ts,tsx}": [
+      "eslint --fix",
+      "git add"
+    ]
+  }
+}
