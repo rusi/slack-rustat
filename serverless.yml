@@ -66,38 +66,38 @@ functions:
 
   createRustat:
     handler: src/api/rustat.createRustat
-    events:
-      - http:
-          method: put
-          path: rustat
+    # events:
+    #   - http:
+    #       method: put
+    #       path: rustat
   deleteRustat:
     handler: src/api/rustat.deleteRustat
-    events:
-      - http:
-          method: delete
-          path: rustat/{username}/{key}
+    # events:
+    #   - http:
+    #       method: delete
+    #       path: rustat/{username}/{key}
   listRustats:
     handler: src/api/rustat.listRustats
-    events:
-      - http:
-          method: get
-          path: rustats/{username}
+    # events:
+    #   - http:
+    #       method: get
+    #       path: rustats/{username}
 
   getActiveRustat:
     handler: src/api/rusi.getActiveRustat
-    events:
-      - http:
-          method: get
-          path: rusi/{username}
+    # events:
+    #   - http:
+    #       method: get
+    #       path: rusi/{username}
   clearActiveRustat:
     handler: src/api/rusi.clearActiveRustat
-    events:
-      - http:
-          method: delete
-          path: rusi/{username}
+    # events:
+    #   - http:
+    #       method: delete
+    #       path: rusi/{username}
   setActiveRustat:
     handler: src/api/rusi.setActiveRustat
-    events:
-      - http:
-          method: put
-          path: rusi
+    # events:
+    #   - http:
+    #       method: put
+    #       path: rusi
