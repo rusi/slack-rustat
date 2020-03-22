@@ -4,7 +4,7 @@ service:
 custom:
   dynamodb:
     stages:
-      - dev
+      - local
     start:
       port: 8000
       inMemory: true
@@ -13,6 +13,9 @@ custom:
   webpack:
     webpackConfig: ./webpack.config.js
     includeModules: true
+
+package:
+  individually: true
 
 plugins:
   - serverless-dotenv-plugin
@@ -23,6 +26,9 @@ plugins:
 provider:
   name: aws
   runtime: nodejs12.x
+  stage: ${opt:stage, 'local'}
+  region: ap-southeast-1
+  profile: slack-bots
   apiGateway:
     minimumCompressionSize: 1024 # Enable gzip compression for responses > 1 KB
   environment:
