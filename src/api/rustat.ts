@@ -1,51 +1,45 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
-import { DynamoDBDocumentClient } from '../services/dynamodb';
-import { CreateRustatPayload } from './types';
-import { createSuccessResponse, makeRustatPk, makeRustatSk } from './util';
+import { makeRustatPk, makeRustatSk } from '../helper';
+import * as RustatService from '../services/rustat';
+import { CreateRustatPayload, Rustat, RustatKeys } from '../types';
+import { createSuccessResponse } from './response';
 import 'source-map-support/register';
 
-export const createItem: APIGatewayProxyHandler = async event => {
+export const createRustat: APIGatewayProxyHandler = async event => {
   const data: CreateRustatPayload = JSON.parse(event.body);
   const { key, message, username } = data;
 
-  await DynamoDBDocumentClient.put({
-    TableName: 'rustats',
-    Item: {
-      PK: makeRustatPk(username),
-      SK: makeRustatSk(username, key),
-      key,
-      message,
-    },
-  }).promise();
+  const rustat: Rustat = {
+    PK: makeRustatPk(username),
+    SK: makeRustatSk(username, key),
+    key,
+    message,
+  };
+  await RustatService.createRustat(rustat);
 
   return createSuccessResponse(200, `Successfully created ${key} for ${username}`);
 };
 
-export const deleteItem: APIGatewayProxyHandler = async event => {
+export const deleteRustat: APIGatewayProxyHandler = async event => {
   const { key, username } = event.pathParameters;
 
-  await DynamoDBDocumentClient.delete({
-    TableName: 'rustats',
-    Key: {
-      PK: makeRustatPk(username),
-      SK: makeRustatSk(username, key),
-    },
-  }).promise();
+  const rustatKeys: RustatKeys = {
+    PK: makeRustatPk(username),
+    SK: makeRustatSk(username, key),
+  };
+  await RustatService.deleteRustat(rustatKeys);
 
   return createSuccessResponse(200, `Successfully deleted ${key} for ${username}`);
 };
 
-export const listItems: APIGatewayProxyHandler = async event => {
+export const listRustats: APIGatewayProxyHandler = async event => {
   const { username } = event.pathParameters;
 
-  const response = await DynamoDBDocumentClient.query({
-    TableName: 'rustats',
-    KeyConditionExpression: 'PK = :pk AND SK >= :key',
-    ExpressionAttributeValues: {
-      ':pk': makeRustatPk(username),
-      ':key': makeRustatSk(username, ''),
-    },
-  }).promise();
+  const rustatKeys: RustatKeys = {
+    PK: makeRustatPk(username),
+    SK: makeRustatSk(username, ''),
+  };
+  const response = await RustatService.listRustats(rustatKeys);
 
   return createSuccessResponse(200, {
     message: 'Success',

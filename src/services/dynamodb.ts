@@ -11,6 +11,8 @@ const options: DynamoDB.ClientConfiguration = {
 
 const isOffline = (): boolean => !!process.env.IS_OFFLINE;
 
+export type QueryOutput = DynamoDB.DocumentClient.QueryOutput;
+
 export const DynamoDBDocumentClient = isOffline()
   ? new DynamoDB.DocumentClient(options)
   : new DynamoDB.DocumentClient();
