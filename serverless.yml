@@ -47,10 +47,6 @@ resources:
             AttributeType: S
           - AttributeName: SK
             AttributeType: S
-          - AttributeName: key
-            AttributeType: S
-          - AttributeName: message
-            AttributeType: S
         KeySchema:
           - AttributeName: PK
             KeyType: HASH
