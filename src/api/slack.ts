@@ -2,6 +2,8 @@ import { App, ExpressReceiver } from '@slack/bolt';
 import serverless from 'serverless-http';
 import { HELP_TEXT, RUSTAT_SUBCOMMANDS, RustatSubcommand } from '../constants';
 
+// Set up custom receiver in order to hook up Express app to serverless-http
+// Ref: https://github.com/slackapi/bolt/issues/191#issuecomment-493641934
 const receiver = new ExpressReceiver({ signingSecret: process.env.SLACK_SIGNING_SECRET });
 const expressApp = receiver.app;
 
