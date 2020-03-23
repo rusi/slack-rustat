@@ -10,6 +10,7 @@ custom:
       inMemory: true
       migrate: true
       convertEmptyValues: true
+  rustatsTableName: rustats
   webpack:
     webpackConfig: ./webpack.config.js
     includeModules: true
@@ -31,17 +32,29 @@ provider:
   profile: slack-bots
   apiGateway:
     minimumCompressionSize: 1024 # Enable gzip compression for responses > 1 KB
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+        - { "Fn::GetAtt": ["RustatsDynamoDBTable", "Arn" ] }
   environment:
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
     DEFAULT_ACCESS_KEY: ${env:DEFAULT_ACCESS_KEY, ''}
     DEFAULT_SECRET: ${env:DEFAULT_SECRET, ''}
+    RUSTATS_TABLE_NAME: ${self:custom.rustatsTableName}
 
 resources:
   Resources:
-    rustats:
+    RustatsDynamoDBTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: rustats
+        TableName: ${self:custom.rustatsTableName}
         AttributeDefinitions:
           - AttributeName: PK
             AttributeType: S
@@ -57,47 +70,53 @@ resources:
           WriteCapacityUnits: 5
 
 functions:
-  helpText:
-    handler: src/api/help.get
+  app:
+    handler: src/api/slack.handler
     events:
-      - http:
-          method: get
-          path: help
+      - http: ANY /
+      - http: 'ANY {proxy+}'
 
-  createRustat:
-    handler: src/api/rustat.createRustat
-    # events:
-    #   - http:
-    #       method: put
-    #       path: rustat
-  deleteRustat:
-    handler: src/api/rustat.deleteRustat
-    # events:
-    #   - http:
-    #       method: delete
-    #       path: rustat/{username}/{key}
-  listRustats:
-    handler: src/api/rustat.listRustats
-    # events:
-    #   - http:
-    #       method: get
-    #       path: rustats/{username}
+  # helpText:
+  #   handler: src/api/help.get
+  #   events:
+  #     - http:
+  #         method: get
+  #         path: help
 
-  getActiveRustat:
-    handler: src/api/rusi.getActiveRustat
-    # events:
-    #   - http:
-    #       method: get
-    #       path: rusi/{username}
-  clearActiveRustat:
-    handler: src/api/rusi.clearActiveRustat
-    # events:
-    #   - http:
-    #       method: delete
-    #       path: rusi/{username}
-  setActiveRustat:
-    handler: src/api/rusi.setActiveRustat
-    # events:
-    #   - http:
-    #       method: put
-    #       path: rusi
+  # createRustat:
+  #   handler: src/api/rustat.createRustat
+  #   # events:
+  #   #   - http:
+  #   #       method: put
+  #   #       path: rustat
+  # deleteRustat:
+  #   handler: src/api/rustat.deleteRustat
+  #   # events:
+  #   #   - http:
+  #   #       method: delete
+  #   #       path: rustat/{username}/{key}
+  # listRustats:
+  #   handler: src/api/rustat.listRustats
+  #   # events:
+  #   #   - http:
+  #   #       method: get
+  #   #       path: rustats/{username}
+
+  # getActiveRustat:
+  #   handler: src/api/rusi.getActiveRustat
+  #   # events:
+  #   #   - http:
+  #   #       method: get
+  #   #       path: rusi/{username}
+  # clearActiveRustat:
+  #   handler: src/api/rusi.clearActiveRustat
+  #   # events:
+  #   #   - http:
+  #   #       method: delete
+  #   #       path: rusi/{username}
+  # setActiveRustat:
+  #   handler: src/api/rusi.setActiveRustat
+  #   # events:
+  #   #   - http:
+  #   #       method: put
+  #   #       path: rusi

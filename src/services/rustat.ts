@@ -1,18 +1,18 @@
 import { makeActiveRustatPk, makeActiveRustatSk } from '../helper';
 import { ActiveRustat, Rustat, RustatKeys } from '../types';
-import { DynamoDBDocumentClient, QueryOutput } from './dynamodb';
+import { DynamoDBDocumentClient, QueryOutput, RUSTATS_TABLE_NAME } from './dynamodb';
 import 'source-map-support/register';
 
 export const createRustat = async (rustat: Rustat): Promise<void> => {
   await DynamoDBDocumentClient.put({
-    TableName: 'rustats',
+    TableName: RUSTATS_TABLE_NAME,
     Item: rustat,
   }).promise();
 };
 
 export const deleteRustat = async (rustatKeys: RustatKeys): Promise<void> => {
   await DynamoDBDocumentClient.delete({
-    TableName: 'rustats',
+    TableName: RUSTATS_TABLE_NAME,
     Key: rustatKeys,
   }).promise();
 };
@@ -20,7 +20,7 @@ export const deleteRustat = async (rustatKeys: RustatKeys): Promise<void> => {
 export const listRustats = async (rustatKeys: RustatKeys): Promise<QueryOutput> => {
   const { PK, SK } = rustatKeys;
   const response = await DynamoDBDocumentClient.query({
-    TableName: 'rustats',
+    TableName: RUSTATS_TABLE_NAME,
     KeyConditionExpression: 'PK = :pk AND SK >= :key',
     ExpressionAttributeValues: {
       ':pk': PK,
@@ -33,14 +33,14 @@ export const listRustats = async (rustatKeys: RustatKeys): Promise<QueryOutput> 
 
 export const setActiveRustat = async (activeRustat: ActiveRustat): Promise<void> => {
   await DynamoDBDocumentClient.put({
-    TableName: 'rustats',
+    TableName: RUSTATS_TABLE_NAME,
     Item: activeRustat,
   }).promise();
 };
 
 export const getActiveRustat = async (username: string): Promise<QueryOutput> => {
   const response = await DynamoDBDocumentClient.query({
-    TableName: 'rustats',
+    TableName: RUSTATS_TABLE_NAME,
     KeyConditionExpression: 'PK = :pk AND SK >= :timestamp',
     ExpressionAttributeValues: {
       ':pk': makeActiveRustatPk(username),
@@ -56,7 +56,7 @@ export const clearActiveRustat = async (username: string): Promise<void> => {
   if (response.Count > 0) {
     const { PK, SK } = response.Items[0];
     await DynamoDBDocumentClient.delete({
-      TableName: 'rustats',
+      TableName: RUSTATS_TABLE_NAME,
       Key: {
         PK,
         SK,
@@ -67,7 +67,7 @@ export const clearActiveRustat = async (username: string): Promise<void> => {
 
 export const listExpiredRustats = async (): Promise<QueryOutput> => {
   const response = await DynamoDBDocumentClient.query({
-    TableName: 'rustats',
+    TableName: RUSTATS_TABLE_NAME,
     KeyConditionExpression: 'SK <= :timestamp',
     ExpressionAttributeValues: {
       ':timestamp': makeActiveRustatSk(`${new Date().getTime()}`),
