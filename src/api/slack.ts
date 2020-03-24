@@ -111,10 +111,10 @@ const parseSubcommand = (mainCommand: RustatCommand, commandText = ''): ParsedSu
   if (RUSTAT_SUBCOMMANDS.includes(tokens[0] as RustatSubcommand)) {
     console.log(`Processing "${tokens[0]}"...`);
 
-    const command = tokens.pop();
+    const command = tokens.shift();
     switch (command) {
       case RustatSubcommand.Add: {
-        const key = tokens.pop();
+        const key = tokens.shift();
         const message = tokens.join(' ');
         const subcommand: AddCommand = {
           command,
@@ -147,7 +147,7 @@ const parseSubcommand = (mainCommand: RustatCommand, commandText = ''): ParsedSu
         return subcommand;
       }
       case RustatSubcommand.Remove: {
-        const key = tokens.pop();
+        const key = tokens.shift();
         const subcommand: RemoveCommand = {
           command,
           payload: {
@@ -163,7 +163,7 @@ const parseSubcommand = (mainCommand: RustatCommand, commandText = ''): ParsedSu
   if (mainCommand === RustatCommand.Rusi) {
     console.log(`Processing "${commandText}" as setting active rustat...`);
 
-    const key = tokens.pop();
+    const key = tokens.shift();
     const expiryDate: Date = chrono.parse(tokens.join(' '));
     const subcommand: SetCommand = {
       command: RustatSubcommand.Set,
