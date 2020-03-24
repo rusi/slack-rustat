@@ -111,7 +111,7 @@ export interface SetCommand extends BaseCommand {
   command: RustatSubcommand.Set;
   payload: {
     key: string;
-    expiryTimestamp: number;
+    expiryDate?: Date;
   };
 }
 

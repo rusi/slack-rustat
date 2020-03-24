@@ -164,12 +164,12 @@ const parseSubcommand = (mainCommand: RustatCommand, commandText = ''): ParsedSu
     console.log(`Processing "${commandText}" as setting active rustat...`);
 
     const key = tokens.shift();
-    const expiryDate: Date = chrono.parse(tokens.join(' '));
+    const expiryDate: Date | undefined = chrono.parseDate(tokens.join(' ')) || undefined;
     const subcommand: SetCommand = {
       command: RustatSubcommand.Set,
       payload: {
         key,
-        expiryTimestamp: expiryDate.getTime(),
+        expiryDate,
       },
     };
     return subcommand;
@@ -305,19 +305,109 @@ app.command('/rustat', async ({ ack, command, respond }) => {
   }
 });
 
-app.command('/rusi', async ({ ack, command, respond }) => {
+app.command('/rusi', async ({ ack, client, command, respond }) => {
   ack();
 
   console.log(`Received "/rusi ${command.text}"`);
 
   const subcommand = parseSubcommand(RustatCommand.Rusi, command.text);
+  const user = command.user_id;
+
   switch (subcommand.command) {
+    case RustatSubcommand.Clear: {
+      try {
+        await RustatService.clearActiveRustat(user);
+
+        await client.users.profile.set({
+          profile: JSON.stringify({
+            /* eslint-disable @typescript-eslint/camelcase */
+            status_text: '',
+            status_emoji: '',
+            /* eslint-enable */
+          }),
+          user,
+        });
+
+        respond({
+          // eslint-disable-next-line @typescript-eslint/camelcase
+          response_type: 'ephemeral',
+          text: 'Successfully cleared active rustat',
+        });
+      } catch (e) {
+        respond({
+          // eslint-disable-next-line @typescript-eslint/camelcase
+          response_type: 'ephemeral',
+          attachments: [
+            {
+              color: '#ff0000',
+              text: e.message,
+            },
+          ],
+          text: 'Error clearing active rustat',
+        });
+      }
+      break;
+    }
     case RustatSubcommand.Help: {
       respond({
         // eslint-disable-next-line @typescript-eslint/camelcase
         response_type: 'ephemeral',
         text: HELP_TEXT,
       });
+      break;
+    }
+    case RustatSubcommand.Set: {
+      try {
+        const { key, expiryDate } = subcommand.payload;
+        if (!key) {
+          throw new Error('Missing `key`');
+        }
+
+        const result = await RustatService.listRustats(user);
+        const rustats: Rustat[] = result.Items as Rustat[];
+        const rustat = rustats.find(r => r.key === key);
+
+        if (!rustat) {
+          throw new Error(`Rustat with key "${key}" not found!`);
+        }
+
+        const { message } = rustat;
+        const tokens = message.split(' ');
+        const emoji = /\:\w+\:/.test(tokens[0]) ? tokens.shift() : ':spock-hand:';
+        const text = emoji ? tokens.join(' ') : message;
+        const expiryTimestamp = expiryDate ? Math.floor(expiryDate.getTime() / 1000) : undefined;
+
+        const profile = JSON.stringify({
+          /* eslint-disable @typescript-eslint/camelcase */
+          status_text: text,
+          status_emoji: emoji,
+          status_expiration: expiryTimestamp,
+          /* eslint-enable */
+        });
+        console.log(profile);
+        await client.users.profile.set({
+          profile,
+          user,
+        });
+
+        respond({
+          // eslint-disable-next-line @typescript-eslint/camelcase
+          response_type: 'ephemeral',
+          text: `Successfully set active rustat to "${key}"${expiryDate ? ` which expires on ${expiryDate}` : ''}`,
+        });
+      } catch (e) {
+        respond({
+          // eslint-disable-next-line @typescript-eslint/camelcase
+          response_type: 'ephemeral',
+          attachments: [
+            {
+              color: '#ff0000',
+              text: e.message,
+            },
+          ],
+          text: 'Error setting active rustat',
+        });
+      }
       break;
     }
     case RustatSubcommand.Unknown: {
