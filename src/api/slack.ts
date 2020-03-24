@@ -201,6 +201,9 @@ app.command('/rustat', async ({ ack, command, respond }) => {
         if (!key) {
           throw new Error('Missing `key`');
         }
+        if (key === RustatSubcommand.Clear) {
+          throw new Error('`clear` is a reserved keyword');
+        }
         if (!message) {
           throw new Error('Missing `message`');
         }
