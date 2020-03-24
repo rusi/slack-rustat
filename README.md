@@ -27,6 +27,7 @@ TBD
 
 ## Usage
 
+TL;DR
 ```
 /rustat help
 /rustat add <key> <message>
@@ -36,57 +37,69 @@ TBD
 /rusi clear
 ```
 
+> Welcome to :sparkles:*The Rustat Hristov Slack bot*:sparkles:!
+> 
+> A "rustat" is a predefined :sparkles:fancy status message:sparkles:. ~It can also mean "R. U. status", that is, "Are you <status>?", like "Are you `lunch`?"~ NOPE.
+> 
+> `/rustat help` -- Print this help text
+> 
+> **Manage your rustats**
+>
+> `/rustat add <key> <message>` -- Save a rustat with the shortcut keyword `<key>`
+>
+> `/rustat remove <key>` -- Deletes a rustat with the shortcut keyword > `<key>`
+>
+> `/rustat list` -- List all saved rustats
+> 
+> **Set your status message**
+>
+> `/rusi <key> [<expiry>]` -- Activate the rustat with the shortcut keyword `<key>` that will automatically be cleared by `<expiry` > (_[in human language](https://github.com/wanasit/chrono)!>_)
+>
+> `/rusi clear` -- Clear your current status message (whether it's a > rustat or not)
+
 ## Development
 
 ### Setup
 
 Requires:
 - NodeJS 12.x
-- Serverless Framework
+- [Serverless Framework](https://serverless.com/framework/docs/getting-started#install-via-npm)
     ```sh
     npm i -g serverless
     ```
+- [ngrok](https://ngrok.com/)
+  - On macOS, with Homebrew: `brew install ngrok`
+- a Slack app -- follow the initial setup here: https://slack.dev/bolt/tutorial/getting-started
+  - Additional steps
+    - Create slash commands for `/rustat` and `/rusi`
+    - Set OAuth redirect URL
 
 ```sh
+# create .env then set the environment variables with values taken from your Slack app
+cp .env.example .env
+
 npm i
 sls dynamodb install
 ```
 
 ### Running locally
 
+Run ngrok
 ```sh
-npm run start:dev
-
-# or
-IS_OFFLINE=1 sls offline start
+ngrok http 3000
 ```
 
-To invoke individual functions:
+Copy the ngrok URL and paste it into:
+- `.env` for `SLACK_REDIRECT_URL`
+- the Slack app's configured slash commands and OAuth redirect URL
+
+Start serverless-offline
+- this watches for changes in the TypeScript source code and automatically rebuilds
+- however, it does not watch for .env changes -- you need to restart in that case
+- also, somehow, serverless-offline buries all console.log output ¯\_(ツ)_/¯
+- the alternative is to run Slack Bolt locally as well, but that also is another PITA because it doesn't watch for local changes
 ```sh
-IS_OFFLINE=1 sls invoke local -f createRustat --path sample.rustat.payload.json
-# (snip)
-# Sample response:
-{
-    "statusCode": 200,
-    "headers": {
-        "Access-Control-Allow-Credentials": true,
-        "Access-Control-Allow-Origin": "*",
-        "Content-Type": "application/json"
-    },
-    "body": {
-        "message": "Successfully created lunch for rusi"
-    }
-}
-
-# or
-npm run invoke:local -- createRustat --path sample.rustat.payload.json
-```
-
-where `sample.rustat.payload.json` contains:
-```js
-{
-  "body": "{ \"key\": \"lunch\", \"message\": \"BURGER\", \"username\": \"rusi\" }"
-}
+npm run start:offline
 ```
 
 ### DynamoDB data model
