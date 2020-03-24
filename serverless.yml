@@ -10,8 +10,8 @@ custom:
       inMemory: true
       migrate: true
       convertEmptyValues: true
-  installationsTableName: installations
-  rustatsTableName: rustats
+  installationsTableName: installations-${opt:stage, 'local'}
+  rustatsTableName: rustats-${opt:stage, 'local'}
   # Workaround for hot-reloading
   # Ref: https://github.com/dherault/serverless-offline/issues/931
   serverless-offline:
