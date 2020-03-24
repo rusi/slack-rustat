@@ -3,9 +3,8 @@ import Auth from '../services/bolt-oauth';
 import chrono from 'chrono-node';
 import serverless from 'serverless-http';
 import { HELP_TEXT, RustatCommand, RUSTAT_SUBCOMMANDS, RustatSubcommand } from '../constants';
-import { makeInstallationPk, makeInstallationSk } from '../helper';
-// import * as RustatService from '../services/rustat';
-// import { ActiveRustat, Rustat, RustatKeys } from '../types';
+import { makeInstallationPk, makeInstallationSk, makeRustat, makeRustatKeys } from '../helper';
+import * as RustatService from '../services/rustat';
 import * as InstallationService from '../services/installation';
 import {
   AddCommand,
@@ -17,6 +16,7 @@ import {
   OAuthResult,
   ParsedSubcommand,
   RemoveCommand,
+  Rustat,
   SetCommand,
 } from '../types';
 
@@ -96,7 +96,7 @@ const app = new App({
 });
 
 const parseSubcommand = (mainCommand: RustatCommand, commandText = ''): ParsedSubcommand => {
-  console.log(`Processing "${commandText}"...`);
+  console.log(`Raw command: "${commandText}"`);
 
   const tokens = commandText
     .trim()
@@ -192,14 +192,106 @@ app.command('/rustat', async ({ ack, command, respond }) => {
   console.log(`Received "/rustat ${command.text}" from ${command.user_name}`);
 
   const subcommand = parseSubcommand(RustatCommand.Rustat, command.text);
+  const user = command.user_id;
 
   switch (subcommand.command) {
+    case RustatSubcommand.Add: {
+      try {
+        const { key, message } = subcommand.payload;
+        if (!key) {
+          throw new Error('Missing `key`');
+        }
+        if (!message) {
+          throw new Error('Missing `message`');
+        }
+
+        await RustatService.createRustat(makeRustat(user, key, message));
+
+        respond({
+          // eslint-disable-next-line @typescript-eslint/camelcase
+          response_type: 'ephemeral',
+          text: `Successfully saved rustat with key "${key}"`,
+        });
+      } catch (e) {
+        respond({
+          // eslint-disable-next-line @typescript-eslint/camelcase
+          response_type: 'ephemeral',
+          attachments: [
+            {
+              color: '#ff0000',
+              text: e.message,
+            },
+          ],
+          text: 'Error saving rustat',
+        });
+      }
+      break;
+    }
     case RustatSubcommand.Help: {
       respond({
         // eslint-disable-next-line @typescript-eslint/camelcase
         response_type: 'ephemeral',
         text: HELP_TEXT,
       });
+      break;
+    }
+    case RustatSubcommand.List: {
+      try {
+        const result = await RustatService.listRustats(user);
+        const rustats: Rustat[] = result.Items as Rustat[];
+
+        respond({
+          // eslint-disable-next-line @typescript-eslint/camelcase
+          response_type: 'ephemeral',
+          attachments: [
+            {
+              text: rustats.map(({ key, message }) => `\`${key}\` → ${message}`).join('\n'),
+            },
+          ],
+          text: 'Your saved rustats:',
+        });
+      } catch (e) {
+        respond({
+          // eslint-disable-next-line @typescript-eslint/camelcase
+          response_type: 'ephemeral',
+          attachments: [
+            {
+              color: '#ff0000',
+              text: e.message,
+            },
+          ],
+          text: 'Error listing rustats',
+        });
+      }
+      break;
+    }
+    case RustatSubcommand.Remove: {
+      try {
+        const { key } = subcommand.payload;
+        if (!key) {
+          throw new Error('Missing `key`');
+        }
+
+        await RustatService.deleteRustat(makeRustatKeys(user, key));
+
+        respond({
+          // eslint-disable-next-line @typescript-eslint/camelcase
+          response_type: 'ephemeral',
+          text: `Successfully deleted rustat with key "${key}"`,
+        });
+      } catch (e) {
+        respond({
+          // eslint-disable-next-line @typescript-eslint/camelcase
+          response_type: 'ephemeral',
+          attachments: [
+            {
+              color: '#ff0000',
+              text: e.message,
+            },
+          ],
+          text: 'Error deleting rustat',
+        });
+      }
       break;
     }
     case RustatSubcommand.Unknown: {

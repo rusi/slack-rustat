@@ -25,7 +25,7 @@ export const deleteRustat: APIGatewayProxyHandler = async event => {
 export const listRustats: APIGatewayProxyHandler = async event => {
   const { username } = event.pathParameters;
 
-  const response = await RustatService.listRustats(makeRustatKeys(username, ''));
+  const response = await RustatService.listRustats(username);
 
   return createSuccessResponse(200, {
     message: 'Success',

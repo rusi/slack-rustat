@@ -54,4 +54,3 @@ export const setActiveRustat: APIGatewayProxyHandler = async event => {
 
   return createSuccessResponse(200, `Successfully set active rustat ${key} for ${username}`);
 };
-

@@ -1,4 +1,4 @@
-import { makeActiveRustatPk, makeActiveRustatSk } from '../helper';
+import { makeActiveRustatPk, makeActiveRustatSk, makeRustatPk, makeRustatSk } from '../helper';
 import { ActiveRustat, Rustat, RustatKeys } from '../types';
 import { DynamoDBDocumentClient, QueryOutput } from './dynamodb';
 import 'source-map-support/register';
@@ -19,14 +19,13 @@ export const deleteRustat = async (rustatKeys: RustatKeys): Promise<void> => {
   }).promise();
 };
 
-export const listRustats = async (rustatKeys: RustatKeys): Promise<QueryOutput> => {
-  const { PK, SK } = rustatKeys;
+export const listRustats = async (username: string): Promise<QueryOutput> => {
   const response = await DynamoDBDocumentClient.query({
     TableName: RUSTATS_TABLE_NAME,
     KeyConditionExpression: 'PK = :pk AND SK >= :key',
     ExpressionAttributeValues: {
-      ':pk': PK,
-      ':key': SK,
+      ':pk': makeRustatPk(username),
+      ':key': makeRustatSk(username, ''),
     },
   }).promise();
 
