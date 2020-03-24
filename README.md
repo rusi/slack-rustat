@@ -74,10 +74,15 @@ Requires:
     - Create slash commands for `/rustat` and `/rusi`
     - Set OAuth redirect URL
 
+Create `.env` then set the environment variables with values taken from your Slack app
+- supports `.env.<sls env>` where `<sls env>` is the value used in the `serverless` command invoked
+- e.g. `.env.dev` for `sls deploy --env dev`
 ```sh
-# create .env then set the environment variables with values taken from your Slack app
-cp .env.example .env
+cp example.env .env
+```
 
+Install app dependencies
+```sh
 npm i
 sls dynamodb install
 ```
