@@ -1,4 +1,4 @@
-import { App, LogLevel } from '@slack/bolt';
+import { App, AuthorizeResult, AuthorizeSourceData, LogLevel } from '@slack/bolt';
 import Auth from '../services/bolt-oauth';
 import chrono from 'chrono-node';
 import serverless from 'serverless-http';
@@ -63,15 +63,17 @@ const oauthStateCheck = (/* oAuthState */): boolean => {
 };
 
 // const authorizeFn = ({ teamId, enterpriseId, userId, conversationId }) => {
-const authorizeFn = async ({ enterpriseId, teamId, userId }): Promise<AuthTokens> => {
+const authorizeFn = async ({ enterpriseId, teamId, userId }: AuthorizeSourceData): Promise<AuthorizeResult> => {
   console.log('authorize', enterpriseId, teamId, userId);
 
   // check wherever you've stored the tokens and get the values based on teamId and/or userId
   const result = await InstallationService.listInstallations(enterpriseId, teamId, userId);
-  console.log(result);
   if (result && result.Count > 0) {
-    const { PK, SK, ...authTokens } = result.Items[0];
-    return authTokens as AuthTokens;
+    const { botId, userAccessToken: userToken } = result.Items[0] as AuthTokens;
+    return {
+      botId,
+      userToken,
+    };
   }
   throw new Error('No matching authorizations');
 };
@@ -86,13 +88,11 @@ const receiver = Auth({
   onError: oauthError,
 });
 const expressApp = receiver.app;
-const token = process.env.SLACK_BOT_TOKEN;
 
 const app = new App({
   authorize: authorizeFn,
   logLevel: LogLevel.DEBUG,
   receiver,
-  token,
 });
 
 const parseSubcommand = (mainCommand: RustatCommand, commandText = ''): ParsedSubcommand => {
