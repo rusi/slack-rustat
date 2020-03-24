@@ -1,7 +1,7 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
-import { makeActiveRustatPk, makeActiveRustatSk } from '../helper';
+import { makeActiveRustat } from '../helper';
 import * as RustatService from '../services/rustat';
-import { ActiveRustat, SetActiveRustatPayload } from '../types';
+import { SetActiveRustatPayload } from '../types';
 import { createSuccessResponse, createErrorResponse } from './response';
 import 'source-map-support/register';
 
@@ -50,11 +50,7 @@ export const setActiveRustat: APIGatewayProxyHandler = async event => {
 
   const timestampString = computeTimestampString(data);
 
-  const activeRustat: ActiveRustat = {
-    PK: makeActiveRustatPk(username),
-    SK: makeActiveRustatSk(timestampString),
-  };
-  await RustatService.setActiveRustat(activeRustat);
+  await RustatService.setActiveRustat(makeActiveRustat(username, timestampString));
 
   return createSuccessResponse(200, `Successfully set active rustat ${key} for ${username}`);
 };

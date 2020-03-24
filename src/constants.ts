@@ -1,3 +1,8 @@
+export enum RustatCommand {
+  Rustat = '/rustat',
+  Rusi = '/rusi',
+}
+
 export enum RustatSubcommand {
   Add = 'add',
   Clear = 'clear',
@@ -10,12 +15,18 @@ export enum RustatSubcommand {
 
 export const RUSTAT_SUBCOMMANDS = Object.values(RustatSubcommand);
 
-export const HELP_TEXT = `Welcome to The Rustat Hristov Slack bot!
+export const HELP_TEXT = `Welcome to :sparkles:*The Rustat Hristov Slack bot*:sparkles:!
 
-/rustat help
-/rustat add <key> <message>
-/rustat remove <key>
-/rustat list
-/rusi <key> [<expire in minutes>]
-/rusi clear
+A "rustat" is a predefined :sparkles:fancy status message:sparkles:. ~It can also mean "R. U. status", that is, "Are you <status>?", like "Are you \`lunch\`?"~ NOPE.
+
+\`/rustat help\` -- Print this help text
+
+*Manage your rustats*
+\`/rustat add <key> <message>\` -- Save a rustat with the shortcut keyword \`<key>\`
+\`/rustat remove <key>\` -- Deletes a rustat with the shortcut keyword \`<key>\`
+\`/rustat list\` -- List all saved rustats
+
+*Set your status message*
+\`/rusi <key> [<expiry>]\` -- Activate the rustat with the shortcut keyword \`<key>\` that will automatically be cleared by \`<expiry\` (_<https://github.com/wanasit/chrono|in human language!>_)
+\`/rusi clear\` -- Clear your current status message (whether it's a rustat or not)
 `;

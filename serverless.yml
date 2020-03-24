@@ -10,7 +10,12 @@ custom:
       inMemory: true
       migrate: true
       convertEmptyValues: true
+  installationsTableName: installations
   rustatsTableName: rustats
+  # Workaround for hot-reloading
+  # Ref: https://github.com/dherault/serverless-offline/issues/931
+  serverless-offline:
+    useChildProcesses: true
   webpack:
     webpackConfig: ./webpack.config.js
     includeModules: true
@@ -42,6 +47,7 @@ provider:
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
       Resource:
+        - { "Fn::GetAtt": ["InstallationsDynamoDBTable", "Arn" ] }
         - { "Fn::GetAtt": ["RustatsDynamoDBTable", "Arn" ] }
   environment:
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
@@ -51,6 +57,23 @@ provider:
 
 resources:
   Resources:
+    InstallationsDynamoDBTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.installationsTableName}
+        AttributeDefinitions:
+          - AttributeName: PK
+            AttributeType: S
+          - AttributeName: SK
+            AttributeType: S
+        KeySchema:
+          - AttributeName: PK
+            KeyType: HASH
+          - AttributeName: SK
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
     RustatsDynamoDBTable:
       Type: AWS::DynamoDB::Table
       Properties:

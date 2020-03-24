@@ -91,6 +91,16 @@ where `sample.rustat.payload.json` contains:
 
 ### DynamoDB data model
 
+#### `installations`
+
+Slack workspace installations
+
+| Entity         | Hash                           | Range           |
+|----------------|--------------------------------|-----------------|
+| `installation` | `PK#<enterprise_id>#<team_id>` | `#SK#<user_id>` |
+
+#### `rustats`
+
 | Entity                    | Hash                  | Range                   | Other attributes |
 |---------------------------|-----------------------|-------------------------|------------------|
 | `rustat`                  | `rustat#<username>`   | `#key#<username>#<key>` | `key`, `message` |

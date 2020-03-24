@@ -2,19 +2,22 @@
   "name": "slack-rustat",
   "private": true,
   "version": "0.1.0",
-  "description": "Slack bot for pre-defined fancy status messages",
+  "description": "Slack bot for predefined fancy status messages",
   "author": "Nikki Erwin Ramirez <necramirez@gmail.com>",
   "license": "MIT",
   "main": "handler.js",
   "scripts": {
     "invoke:local": "IS_OFFLINE=1 serverless invoke local -f",
     "lint": "tsc --noEmit && eslint '*/**/*.{js,ts,tsx}' --quiet --fix",
-    "start:dev": "IS_OFFLINE=1 serverless offline start",
+    "start:bolt": "IS_OFFLINE=1 node -r 'dotenv/config' -e 'require(\"./.webpack/service/src/api/slack\").start()'",
+    "start:offline": "IS_OFFLINE=1 serverless offline start --printOutput --verbose",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "@slack/bolt": "^1.8.0",
+    "@slack/web-api": "^5.8.0",
     "aws-sdk": "^2.643.0",
+    "chrono-node": "^1.4.4",
     "serverless-http": "^2.3.2",
     "source-map-support": "^0.5.10"
   },
@@ -23,6 +26,7 @@
     "@types/node": "^10.12.18",
     "@typescript-eslint/eslint-plugin": "^2.24.0",
     "@typescript-eslint/parser": "^2.24.0",
+    "dotenv": "^8.2.0",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.10.0",
     "eslint-plugin-prettier": "^3.1.2",

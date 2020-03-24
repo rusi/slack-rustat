@@ -1,7 +1,9 @@
 import { makeActiveRustatPk, makeActiveRustatSk } from '../helper';
 import { ActiveRustat, Rustat, RustatKeys } from '../types';
-import { DynamoDBDocumentClient, QueryOutput, RUSTATS_TABLE_NAME } from './dynamodb';
+import { DynamoDBDocumentClient, QueryOutput } from './dynamodb';
 import 'source-map-support/register';
+
+const RUSTATS_TABLE_NAME = process.env.RUSTATS_TABLE_NAME || 'rustats';
 
 export const createRustat = async (rustat: Rustat): Promise<void> => {
   await DynamoDBDocumentClient.put({

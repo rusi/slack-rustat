@@ -18,5 +18,3 @@ export const DynamoDBDocumentClient = isOffline()
   : new DynamoDB.DocumentClient();
 
 export const DynamoDBService = isOffline() ? new DynamoDB(options) : new DynamoDB();
-
-export const RUSTATS_TABLE_NAME = process.env.RUSTATS_TABLE_NAME || 'rustats';
