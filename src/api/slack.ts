@@ -348,7 +348,7 @@ app.command('/rusi', async ({ ack: respond, client, command, payload }) => {
           // eslint-disable-next-line @typescript-eslint/camelcase
           response_type: 'ephemeral',
           text: `Successfully set active rustat to "${key}"${
-            expiryDate ? ` which expires on ${new Date(expiryTimestamp)} ${tzLabel}` : ''
+            expiryDate ? ` which expires on ${new Date(expiryTimestamp * 1000)} ${tzLabel}` : ''
           }`,
         });
       } catch (e) {
