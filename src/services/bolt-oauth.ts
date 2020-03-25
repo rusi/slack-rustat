@@ -61,13 +61,13 @@ const Auth = ({
 
     // if not valid, throw error
     if (!stateIsValid) {
-      await onError(new Error('Invalid state.'));
+      onError(new Error('Invalid state.'));
       return;
     }
 
     // get tokens
     const webClient = new WebClient(null);
-    return webClient.oauth.v2
+    await webClient.oauth.v2
       .access({
         /* eslint-disable @typescript-eslint/camelcase */
         client_id: clientId,
@@ -76,12 +76,8 @@ const Auth = ({
         redirect_url: redirectUrl,
         /* eslint-enable */
       })
-      .then(async oAuthResult => {
-        await onSuccess({ res, oAuthResult });
-      })
-      .catch(async error => {
-        await onError(error);
-      });
+      .then(oAuthResult => onSuccess({ res, oAuthResult }))
+      .catch(error => onError({ res, error }));
   });
 
   return receiver;

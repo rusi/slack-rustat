@@ -20,40 +20,45 @@ import {
   SetCommand,
 } from '../types';
 
-const oauthSuccess = async ({ res, oAuthResult }: { res: object; oAuthResult: OAuthResult }): Promise<void> => {
-  // save oAuthResult somewhere permanent since it has all the tokens
-  /* eslint-disable @typescript-eslint/camelcase */
-  const {
-    access_token: botAccessToken,
-    app_id: appId,
-    authed_user: { id: userId, access_token: userAccessToken },
-    bot_user_id: botUserId,
-    incoming_webhook: { channel_id: channelId },
-    enterprise,
-    team: { id: teamId },
-  } = oAuthResult;
-  const enterpriseId = enterprise ? enterprise.id : null;
-  const installation: Installation = {
-    PK: makeInstallationPk(enterpriseId, teamId),
-    SK: makeInstallationSk(userId),
-    appId,
-    botAccessToken,
-    botId: botUserId,
-    botUserId,
-    channelId,
-    enterpriseId,
-    teamId,
-    userAccessToken,
-    userId,
-  };
-  /* eslint-enable */
-  await InstallationService.saveInstallation(installation);
-  res.send('Success! You may close this page.');
-};
-
-const oauthError = (error): void => {
+const oauthError = (res, error): void => {
   console.log('oauthError', error);
   // do something about that error to let the user know
+  res.sendStatus(500).send(error.message);
+};
+
+const oauthSuccess = async ({ res, oAuthResult }: { res: object; oAuthResult: OAuthResult }): Promise<void> => {
+  // save oAuthResult somewhere permanent since it has all the tokens
+  try {
+    /* eslint-disable @typescript-eslint/camelcase */
+    const {
+      access_token: botAccessToken,
+      app_id: appId,
+      authed_user: { id: userId, access_token: userAccessToken },
+      bot_user_id: botUserId,
+      incoming_webhook: { channel_id: channelId },
+      enterprise,
+      team: { id: teamId },
+    } = oAuthResult;
+    const enterpriseId = enterprise ? enterprise.id : null;
+    const installation: Installation = {
+      PK: makeInstallationPk(enterpriseId, teamId),
+      SK: makeInstallationSk(userId),
+      appId,
+      botAccessToken,
+      botId: botUserId,
+      botUserId,
+      channelId,
+      enterpriseId,
+      teamId,
+      userAccessToken,
+      userId,
+    };
+    /* eslint-enable */
+    await InstallationService.saveInstallation(installation);
+    res.send('Success! You may close this page.');
+  } catch (error) {
+    oauthError(res, error);
+  }
 };
 
 const oauthStateCheck = (/* oAuthState */): boolean => {
