@@ -13,7 +13,7 @@ export const handler: APIGatewayProxyHandler = async event => {
   const redirectUrl = process.env.SLACK_REDIRECT_URL;
 
   try {
-    const response = (await request.post('https://slack.com/api/oauth.v2.access', {
+    const response = await request.post('https://slack.com/api/oauth.v2.access', {
       form: {
         /* eslint-disable @typescript-eslint/camelcase */
         client_id: clientId,
@@ -22,12 +22,14 @@ export const handler: APIGatewayProxyHandler = async event => {
         redirect_url: redirectUrl,
         /* eslint-enable */
       },
-    })) as OAuthResult;
+    });
 
-    if (!response || !response.ok) {
+    const result: OAuthResult = (response ? JSON.parse(response) : {}) as OAuthResult;
+
+    if (!result || !result.ok) {
       return createErrorResponse(401, {
         message: 'Failed oauthCallback',
-        error: response,
+        error: result,
       });
     }
 
@@ -40,7 +42,7 @@ export const handler: APIGatewayProxyHandler = async event => {
       incoming_webhook: { channel_id: channelId },
       enterprise,
       team: { id: teamId },
-    } = (response as unknown) as OAuthResult;
+    } = result;
     /* eslint-enable */
 
     const enterpriseId = enterprise ? enterprise.id : null;
@@ -60,7 +62,10 @@ export const handler: APIGatewayProxyHandler = async event => {
     await InstallationService.saveInstallation(installation);
 
     return createSuccessResponse(200, 'Success! You may close this page.');
-  } catch (e) {
-    throw e;
+  } catch (error) {
+    return createErrorResponse(500, {
+      message: 'Failed oauthCallback',
+      error,
+    });
   }
 };
