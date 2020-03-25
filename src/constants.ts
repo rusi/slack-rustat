@@ -22,7 +22,7 @@ A "rustat" is a predefined :sparkles:fancy status message:sparkles:. ~It can als
 \`/rustat help\` -- Print this help text
 
 *Manage your rustats*
-\`/rustat add <key> <message>\` -- Save a rustat with the shortcut keyword \`<key>\`
+\`/rustat add <key> <message>\` -- Save a rustat with the shortcut keyword \`<key>\`; if \`<message>\` starts with an emoji, that emoji will be used as status emoji
 \`/rustat remove <key>\` -- Deletes a rustat with the shortcut keyword \`<key>\`
 \`/rustat list\` -- List all saved rustats
 

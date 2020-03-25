@@ -1,4 +1,4 @@
-import { App, AuthorizeResult, AuthorizeSourceData, ExpressReceiver, LogLevel } from '@slack/bolt';
+import { App, AuthorizeResult, AuthorizeSourceData, ExpressReceiver } from '@slack/bolt';
 import chrono from 'chrono-node';
 import serverless from 'serverless-http';
 import { HELP_TEXT, RustatCommand, RUSTAT_SUBCOMMANDS, RustatSubcommand } from '../constants';
@@ -38,7 +38,7 @@ const expressApp = receiver.app;
 
 const app = new App({
   authorize: authorizeFn,
-  logLevel: LogLevel.DEBUG,
+  convoStore: false,
   receiver,
 });
 
@@ -133,12 +133,11 @@ const parseSubcommand = (mainCommand: RustatCommand, commandText = ''): ParsedSu
   }
 };
 
-app.command('/rustat', async ({ ack, command, respond }) => {
-  ack();
-
+app.command('/rustat', async ({ ack: respond, command }) => {
   console.log(`Received "/rustat ${command.text}" from ${command.user_name}`);
 
   const subcommand = parseSubcommand(RustatCommand.Rustat, command.text);
+
   const user = command.user_id;
 
   switch (subcommand.command) {
@@ -198,7 +197,7 @@ app.command('/rustat', async ({ ack, command, respond }) => {
               text: rustats.map(({ key, message }) => `\`${key}\` → ${message}`).join('\n'),
             },
           ],
-          text: 'Your saved rustats:',
+          text: rustats.length ? 'Your saved rustats:' : 'You have no saved rustats.',
         });
       } catch (e) {
         respond({
@@ -253,12 +252,11 @@ app.command('/rustat', async ({ ack, command, respond }) => {
       break;
     }
   }
+  console.log(`End processing "/rustat ${command.text}" from ${command.user_name}`);
 });
 
-app.command('/rusi', async ({ ack, client, command, respond }) => {
-  ack();
-
-  console.log(`Received "/rusi ${command.text}"`);
+app.command('/rusi', async ({ ack: respond, client, command, payload }) => {
+  console.log(`Received "/rusi ${command.text}" from ${command.user_name}`);
 
   const subcommand = parseSubcommand(RustatCommand.Rusi, command.text);
   const user = command.user_id;
@@ -321,11 +319,17 @@ app.command('/rusi', async ({ ack, client, command, respond }) => {
           throw new Error(`Rustat with key "${key}" not found!`);
         }
 
+        const { user: userInfo } = await client.users.info({ user });
+        /* eslint-disable @typescript-eslint/no-explicit-any */
+        const tzLabel: string = userInfo && (userInfo as any).tz_label ? (userInfo as any).tz_label : '';
+        const tzOffsetSeconds: number = userInfo && (userInfo as any).tz_offset ? (userInfo as any).tz_offset : 0;
+        /* eslint-enable */
+
         const { message } = rustat;
         const tokens = message.split(' ');
         const emoji = /\:\w+\:/.test(tokens[0]) ? tokens.shift() : ':spock-hand:';
         const text = emoji ? tokens.join(' ') : message;
-        const expiryTimestamp = expiryDate ? Math.floor(expiryDate.getTime() / 1000) : undefined;
+        const expiryTimestamp = expiryDate ? Math.floor(expiryDate.getTime() / 1000) + tzOffsetSeconds : undefined;
 
         const profile = JSON.stringify({
           /* eslint-disable @typescript-eslint/camelcase */
@@ -343,7 +347,9 @@ app.command('/rusi', async ({ ack, client, command, respond }) => {
         respond({
           // eslint-disable-next-line @typescript-eslint/camelcase
           response_type: 'ephemeral',
-          text: `Successfully set active rustat to "${key}"${expiryDate ? ` which expires on ${expiryDate}` : ''}`,
+          text: `Successfully set active rustat to "${key}"${
+            expiryDate ? ` which expires on ${new Date(expiryTimestamp)} ${tzLabel}` : ''
+          }`,
         });
       } catch (e) {
         respond({
@@ -369,6 +375,7 @@ app.command('/rusi', async ({ ack, client, command, respond }) => {
       break;
     }
   }
+  console.log(`End processing "/rusi ${command.text}" from ${command.user_name}`);
 });
 
 export const start = async (): Promise<void> => {
