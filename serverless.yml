@@ -26,8 +26,8 @@ package:
 plugins:
   - serverless-dotenv-plugin
   - serverless-dynamodb-local
-  - serverless-offline
   - serverless-webpack
+  - serverless-offline # must be last
 
 provider:
   name: aws
@@ -98,14 +98,14 @@ functions:
     events:
       - http: ANY /
       - http: 'ANY {proxy+}'
-  oauthCallback:
-    handler: src/api/slack.handler
-    events:
-      - http: 'GET /oauth/callback/{proxy+}'
   slackEvents:
     handler: src/api/slack.handler
     events:
       - http: 'POST /slack/events'
+  oauthCallback:
+    handler: src/api/oauth.handler
+    events:
+      - http: 'GET /oauth/{proxy+}'
 
   # helpText:
   #   handler: src/api/help.get

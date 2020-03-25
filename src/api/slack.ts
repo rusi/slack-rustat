@@ -1,9 +1,8 @@
-import { App, AuthorizeResult, AuthorizeSourceData, LogLevel } from '@slack/bolt';
-import Auth from '../services/bolt-oauth';
+import { App, AuthorizeResult, AuthorizeSourceData, ExpressReceiver, LogLevel } from '@slack/bolt';
 import chrono from 'chrono-node';
 import serverless from 'serverless-http';
 import { HELP_TEXT, RustatCommand, RUSTAT_SUBCOMMANDS, RustatSubcommand } from '../constants';
-import { makeInstallationPk, makeInstallationSk, makeRustat, makeRustatKeys } from '../helper';
+import { makeRustat, makeRustatKeys } from '../helper';
 import * as RustatService from '../services/rustat';
 import * as InstallationService from '../services/installation';
 import {
@@ -11,61 +10,12 @@ import {
   AuthTokens,
   ClearCommand,
   HelpCommand,
-  Installation,
   ListCommand,
-  OAuthResult,
   ParsedSubcommand,
   RemoveCommand,
   Rustat,
   SetCommand,
 } from '../types';
-
-const oauthError = (res, error): void => {
-  console.log('oauthError', error);
-  // do something about that error to let the user know
-  res.sendStatus(500).send(error.message);
-};
-
-const oauthSuccess = async ({ res, oAuthResult }: { res: object; oAuthResult: OAuthResult }): Promise<void> => {
-  // save oAuthResult somewhere permanent since it has all the tokens
-  try {
-    /* eslint-disable @typescript-eslint/camelcase */
-    const {
-      access_token: botAccessToken,
-      app_id: appId,
-      authed_user: { id: userId, access_token: userAccessToken },
-      bot_user_id: botUserId,
-      incoming_webhook: { channel_id: channelId },
-      enterprise,
-      team: { id: teamId },
-    } = oAuthResult;
-    const enterpriseId = enterprise ? enterprise.id : null;
-    const installation: Installation = {
-      PK: makeInstallationPk(enterpriseId, teamId),
-      SK: makeInstallationSk(userId),
-      appId,
-      botAccessToken,
-      botId: botUserId,
-      botUserId,
-      channelId,
-      enterpriseId,
-      teamId,
-      userAccessToken,
-      userId,
-    };
-    /* eslint-enable */
-    await InstallationService.saveInstallation(installation);
-    res.send('Success! You may close this page.');
-  } catch (error) {
-    oauthError(res, error);
-  }
-};
-
-const oauthStateCheck = (/* oAuthState */): boolean => {
-  // check the parameter state against your saved state to ensure everything is ok
-  // BUT SOMEHOW this state is always empty...
-  return true;
-};
 
 // const authorizeFn = ({ teamId, enterpriseId, userId, conversationId }) => {
 const authorizeFn = async ({ enterpriseId, teamId, userId }: AuthorizeSourceData): Promise<AuthorizeResult> => {
@@ -81,14 +31,8 @@ const authorizeFn = async ({ enterpriseId, teamId, userId }: AuthorizeSourceData
   throw new Error('No matching authorizations');
 };
 
-const receiver = Auth({
-  clientId: process.env.SLACK_CLIENT_ID,
-  clientSecret: process.env.SLACK_CLIENT_SECRET,
+const receiver = new ExpressReceiver({
   signingSecret: process.env.SLACK_SIGNING_SECRET,
-  redirectUrl: process.env.SLACK_REDIRECT_URL,
-  stateCheck: oauthStateCheck,
-  onSuccess: oauthSuccess,
-  onError: oauthError,
 });
 const expressApp = receiver.app;
 
