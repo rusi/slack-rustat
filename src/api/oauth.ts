@@ -8,12 +8,13 @@ import { createSuccessResponse, createErrorResponse } from './response';
 export const handler: APIGatewayProxyHandler = async event => {
   const { code } = event.queryStringParameters;
 
+  const apiUrl = process.env.SLACK_API_URL;
   const clientId = process.env.SLACK_CLIENT_ID;
   const clientSecret = process.env.SLACK_CLIENT_SECRET;
   const redirectUrl = process.env.SLACK_REDIRECT_URL;
 
   try {
-    const response = await request.post('https://slack.com/api/oauth.v2.access', {
+    const response = await request.post(`${apiUrl}/oauth.v2.access`, {
       form: {
         /* eslint-disable @typescript-eslint/camelcase */
         client_id: clientId,
