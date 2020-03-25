@@ -47,12 +47,13 @@ provider:
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
       Resource:
-        - { "Fn::GetAtt": ["InstallationsDynamoDBTable", "Arn" ] }
-        - { "Fn::GetAtt": ["RustatsDynamoDBTable", "Arn" ] }
+        - { "Fn::GetAtt": ["InstallationsDynamoDBTable", "Arn"] }
+        - { "Fn::GetAtt": ["RustatsDynamoDBTable", "Arn"] }
   environment:
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
     DEFAULT_ACCESS_KEY: ${env:DEFAULT_ACCESS_KEY, ''}
     DEFAULT_SECRET: ${env:DEFAULT_SECRET, ''}
+    INSTALLATIONS_TABLE_NAME: ${self:custom.installationsTableName}
     RUSTATS_TABLE_NAME: ${self:custom.rustatsTableName}
 
 resources:
