@@ -1,5 +1,6 @@
 import { App, AuthorizeResult, AuthorizeSourceData, ExpressReceiver } from '@slack/bolt';
 import chrono from 'chrono-node';
+import { format } from 'date-fns';
 import serverless from 'serverless-http';
 import { HELP_TEXT, RustatCommand, RUSTAT_SUBCOMMANDS, RustatSubcommand } from '../constants';
 import { makeRustat, makeRustatKeys } from '../helper';
@@ -323,13 +324,16 @@ app.command('/rusi', async ({ ack: respond, client, command, payload }) => {
         /* eslint-disable @typescript-eslint/no-explicit-any */
         const tzLabel: string = userInfo && (userInfo as any).tz_label ? (userInfo as any).tz_label : '';
         const tzOffsetSeconds: number = userInfo && (userInfo as any).tz_offset ? (userInfo as any).tz_offset : 0;
+        const normalizedTzOffsetSeconds = tzOffsetSeconds < 0 ? tzOffsetSeconds + 12 * 60 * 60 : tzOffsetSeconds;
         /* eslint-enable */
 
         const { message } = rustat;
         const tokens = message.split(' ');
         const emoji = /\:\w+\:/.test(tokens[0]) ? tokens.shift() : ':spock-hand:';
         const text = emoji ? tokens.join(' ') : message;
-        const expiryTimestamp = expiryDate ? Math.floor(expiryDate.getTime() / 1000) + tzOffsetSeconds : undefined;
+        const expiryTimestamp = expiryDate
+          ? Math.floor(expiryDate.getTime() / 1000) - normalizedTzOffsetSeconds
+          : undefined;
 
         const profile = JSON.stringify({
           /* eslint-disable @typescript-eslint/camelcase */
@@ -348,7 +352,9 @@ app.command('/rusi', async ({ ack: respond, client, command, payload }) => {
           // eslint-disable-next-line @typescript-eslint/camelcase
           response_type: 'ephemeral',
           text: `Successfully set active rustat to "${key}"${
-            expiryDate ? ` which expires on ${new Date(expiryTimestamp * 1000)} ${tzLabel}` : ''
+            expiryDate
+              ? ` which expires on ${format(new Date((expiryTimestamp + tzOffsetSeconds) * 1000), 'PPpp')} ${tzLabel}`
+              : ''
           }`,
         });
       } catch (e) {
