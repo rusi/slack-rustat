@@ -376,11 +376,12 @@ app.command('/rusi', async ({ ack: respond, client, command, payload }) => {
           user,
         });
 
+        const rawDateWithoutTz = new Date((dateToSec(expiryDate) + tzOffsetSeconds) * 1000);
         respond({
           // eslint-disable-next-line @typescript-eslint/camelcase
           response_type: 'ephemeral',
           text: `Successfully set active rustat to "${key}"${
-            expiryDate ? ` which expires on ${format(zToTz(expiryDate, tzOffsetSeconds), 'PPpp')} ${tzLabel}` : ''
+            expiryDate ? ` which expires on ${format(rawDateWithoutTz, 'PPpp')} ${tzLabel}` : ''
           }`,
         });
       } catch (e) {
