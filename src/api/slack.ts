@@ -112,12 +112,12 @@ const parseSubcommand = (mainCommand: RustatCommand, commandText = ''): ParsedSu
     console.log(`Processing "${commandText}" as setting active rustat...`);
 
     const key = tokens.shift();
-    const expiryDate: Date | undefined = chrono.parseDate(tokens.join(' ')) || undefined;
+    const expiryString = tokens.join(' ');
     const subcommand: SetCommand = {
       command: RustatSubcommand.Set,
       payload: {
         key,
-        expiryDate,
+        expiryString,
       },
     };
     return subcommand;
@@ -307,7 +307,7 @@ app.command('/rusi', async ({ ack: respond, client, command, payload }) => {
     }
     case RustatSubcommand.Set: {
       try {
-        const { key, expiryDate } = subcommand.payload;
+        const { key, expiryString } = subcommand.payload;
         if (!key) {
           throw new Error('Missing `key`');
         }
@@ -324,16 +324,44 @@ app.command('/rusi', async ({ ack: respond, client, command, payload }) => {
         /* eslint-disable @typescript-eslint/no-explicit-any */
         const tzLabel: string = userInfo && (userInfo as any).tz_label ? (userInfo as any).tz_label : '';
         const tzOffsetSeconds: number = userInfo && (userInfo as any).tz_offset ? (userInfo as any).tz_offset : 0;
-        const normalizedTzOffsetSeconds = tzOffsetSeconds < 0 ? tzOffsetSeconds + 12 * 60 * 60 : tzOffsetSeconds;
+        console.log(tzLabel, tzOffsetSeconds);
         /* eslint-enable */
 
         const { message } = rustat;
         const tokens = message.split(' ');
         const emoji = /\:\w+\:/.test(tokens[0]) ? tokens.shift() : ':spock-hand:';
         const text = emoji ? tokens.join(' ') : message;
-        const expiryTimestamp = expiryDate
-          ? Math.floor(expiryDate.getTime() / 1000) - normalizedTzOffsetSeconds
-          : undefined;
+
+        const msToSec = (ms: number): number => Math.floor(ms / 1000);
+        const dateToSec = (d: Date): number => msToSec(d.getTime());
+        const zToTz = (d: Date, tzOffsetSeconds = 0): Date => {
+          const offsetDate = new Date((dateToSec(d) + tzOffsetSeconds) * 1000);
+          const tzString = String((tzOffsetSeconds * 100) / 3600).padStart(4, '0');
+          const dateWithTzString = offsetDate.toISOString().replace('Z', `+${tzString}`);
+          const result = new Date(dateWithTzString);
+          console.log(
+            `Converting ${d.toISOString()} to TZ ${tzString} => ${result.toISOString()} == ${dateWithTzString} // TZ offset sec ${tzOffsetSeconds}`
+          );
+          return result;
+        };
+
+        const nowWithUserTzOffset = zToTz(new Date(), tzOffsetSeconds);
+        console.log(
+          `Parsing expiry from "${expiryString}"... Reference time: ${nowWithUserTzOffset.toISOString()} => ${dateToSec(
+            nowWithUserTzOffset
+          )}`
+        );
+        const expiryDate: Date | null = chrono.parseDate(expiryString, nowWithUserTzOffset, { forwardDate: true });
+        if (expiryDate) {
+          console.log(
+            `Parsed expiry from "${expiryString}": ${expiryDate.toISOString()} => ${dateToSec(
+              expiryDate
+            )}; Reference time: ${nowWithUserTzOffset.toISOString()} => ${dateToSec(nowWithUserTzOffset)}`
+          );
+        } else {
+          console.log(`Failed parsing "${expiryString}"!`);
+        }
+        const expiryTimestamp = expiryDate ? dateToSec(expiryDate) : undefined;
 
         const profile = JSON.stringify({
           /* eslint-disable @typescript-eslint/camelcase */
@@ -342,7 +370,7 @@ app.command('/rusi', async ({ ack: respond, client, command, payload }) => {
           status_expiration: expiryTimestamp,
           /* eslint-enable */
         });
-        console.log(profile);
+        console.log(profile, dateToSec(new Date()));
         await client.users.profile.set({
           profile,
           user,
@@ -352,9 +380,7 @@ app.command('/rusi', async ({ ack: respond, client, command, payload }) => {
           // eslint-disable-next-line @typescript-eslint/camelcase
           response_type: 'ephemeral',
           text: `Successfully set active rustat to "${key}"${
-            expiryDate
-              ? ` which expires on ${format(new Date((expiryTimestamp + tzOffsetSeconds) * 1000), 'PPpp')} ${tzLabel}`
-              : ''
+            expiryDate ? ` which expires on ${format(zToTz(expiryDate, tzOffsetSeconds), 'PPpp')} ${tzLabel}` : ''
           }`,
         });
       } catch (e) {
