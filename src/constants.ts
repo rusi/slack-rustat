@@ -27,6 +27,6 @@ A "rustat" is a predefined :sparkles:fancy status message:sparkles:. ~It can als
 \`/rustat list\` -- List all saved rustats
 
 *Set your status message*
-\`/rusi <key> [<expiry>]\` -- Activate the rustat with the shortcut keyword \`<key>\` that will automatically be cleared by \`<expiry\` (_<https://github.com/wanasit/chrono|in human language!>_)
+\`/rusi <key> [<expiry>]\` -- Activate the rustat with the shortcut keyword \`<key>\` that will (optionally) automatically be cleared by \`<expiry\` (_<https://github.com/wanasit/chrono|in human language!>_); e.g. \`/rusi lunch\`, \`/rusi sleep until 10pm\`, \`/rusi meeting for 30 minutes\` or \`/rusi call until 2am EST\`
 \`/rusi clear\` -- Clear your current status message (whether it's a rustat or not)
 `;

@@ -53,7 +53,7 @@ TL;DR
 > 
 > **Set your status message**
 >
-> `/rusi <key> [<expiry>]` -- Activate the rustat with the shortcut keyword `<key>` that will automatically be cleared by `<expiry` > (_[in human language](https://github.com/wanasit/chrono)!>_); e.g. `/rusi sleep until 10pm`, `/rusi meeting for 30 minutes` or `/rusi call until 2am EST`
+> `/rusi <key> [<expiry>]` -- Activate the rustat with the shortcut keyword `<key>` that will (optionally) automatically be cleared by `<expiry` > (_[in human language](https://github.com/wanasit/chrono)!>_); e.g. `/rusi lunch`, `/rusi sleep until 10pm`, `/rusi meeting for 30 minutes` or `/rusi call until 2am EST`
 >
 > `/rusi clear` -- Clear your current status message (whether it's a > rustat or not)
 
