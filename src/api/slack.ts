@@ -50,6 +50,9 @@ app.command('/rustat', async ({ ack: respond, command }) => {
         if (key === RustatSubcommand.Clear) {
           throw new Error('`clear` is a reserved keyword');
         }
+        if (key === RustatSubcommand.Help) {
+          throw new Error('`help` is a reserved keyword');
+        }
         if (!message) {
           throw new Error('Missing `message`');
         }
