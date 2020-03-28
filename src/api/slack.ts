@@ -166,7 +166,7 @@ app.command('/rustat', async ({ ack: respond, command }) => {
   console.log(`End processing "/rustat ${command.text}" from ${command.user_name}`);
 });
 
-app.command('/rusi', async ({ ack: respond, client, command, payload }) => {
+app.command('/rusi', async ({ ack: respond, client, command }) => {
   console.log(`Received "/rusi ${command.text}" from ${command.user_name}`);
 
   const subcommand = parseSubcommand(RustatCommand.Rusi, command.text);
