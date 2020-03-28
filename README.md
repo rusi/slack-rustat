@@ -122,6 +122,5 @@ Slack workspace installations
 | Entity                    | Hash                  | Range                   | Other attributes |
 |---------------------------|-----------------------|-------------------------|------------------|
 | `rustat`                  | `rustat#<username>`   | `#key#<username>#<key>` | `key`, `message` |
-| Active, expiring `rustat` | `expiring#<username>` | `expires#<timestamp>`   |                  |
 
 Ref: https://aws.amazon.com/getting-started/projects/design-a-database-for-a-mobile-app-with-dynamodb/4/

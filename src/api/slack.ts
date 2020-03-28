@@ -175,8 +175,6 @@ app.command('/rusi', async ({ ack: respond, client, command, payload }) => {
   switch (subcommand.command) {
     case RustatSubcommand.Clear: {
       try {
-        await RustatService.clearActiveRustat(user);
-
         await client.users.profile.set({
           profile: JSON.stringify({
             /* eslint-disable @typescript-eslint/camelcase */
