@@ -1,9 +1,11 @@
 import { DynamoDBDocumentClient, QueryOutput } from './dynamodb';
 import 'source-map-support/register';
-import { makeInstallationPk, makeInstallationSk } from '../helper';
 import { Installation } from '../types';
 
 const INSTALLATIONS_TABLE_NAME = process.env.INSTALLATIONS_TABLE_NAME || 'installations';
+
+export const makeInstallationPk = (enterpriseId: string, teamId: string): string => `PK#${enterpriseId}#${teamId}`;
+export const makeInstallationSk = (userId: string): string => `#SK#${userId}`;
 
 export const saveInstallation = async (installation: Installation): Promise<void> => {
   await DynamoDBDocumentClient.put({

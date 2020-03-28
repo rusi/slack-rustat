@@ -3,7 +3,6 @@ import chrono from 'chrono-node';
 import { format } from 'date-fns';
 import serverless from 'serverless-http';
 import { HELP_TEXT, RustatCommand, RUSTAT_SUBCOMMANDS, RustatSubcommand } from '../constants';
-import { makeRustat, makeRustatKeys } from '../helper';
 import * as RustatService from '../services/rustat';
 import * as InstallationService from '../services/installation';
 import {
@@ -155,7 +154,7 @@ app.command('/rustat', async ({ ack: respond, command }) => {
           throw new Error('Missing `message`');
         }
 
-        await RustatService.createRustat(makeRustat(user, key, message));
+        await RustatService.createRustat(RustatService.makeRustat(user, key, message));
 
         respond({
           // eslint-disable-next-line @typescript-eslint/camelcase
@@ -222,7 +221,7 @@ app.command('/rustat', async ({ ack: respond, command }) => {
           throw new Error('Missing `key`');
         }
 
-        await RustatService.deleteRustat(makeRustatKeys(user, key));
+        await RustatService.deleteRustat(RustatService.makeRustatKeys(user, key));
 
         respond({
           // eslint-disable-next-line @typescript-eslint/camelcase

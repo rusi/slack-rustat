@@ -1,9 +1,31 @@
-import { makeActiveRustatPk, makeActiveRustatSk, makeRustatPk, makeRustatSk } from '../helper';
 import { ActiveRustat, Rustat, RustatKeys } from '../types';
 import { DynamoDBDocumentClient, QueryOutput } from './dynamodb';
 import 'source-map-support/register';
 
 const RUSTATS_TABLE_NAME = process.env.RUSTATS_TABLE_NAME || 'rustats';
+
+const makeRustatPk = (username: string): string => `rustat#${username}`;
+const makeRustatSk = (username: string, key: string): string => `#key#${username}#${key}`;
+
+const makeActiveRustatPk = (username: string): string => `expiring#${username}`;
+const makeActiveRustatSk = (timestamp: string): string => `expires#${timestamp}`;
+
+export const makeRustat = (username: string, key: string, message: string): Rustat => ({
+  PK: makeRustatPk(username),
+  SK: makeRustatSk(username, key),
+  key,
+  message,
+});
+
+export const makeRustatKeys = (username: string, key: string): RustatKeys => ({
+  PK: makeRustatPk(username),
+  SK: makeRustatSk(username, key),
+});
+
+export const makeActiveRustat = (username: string, timestamp: string): ActiveRustat => ({
+  PK: makeActiveRustatPk(username),
+  SK: makeActiveRustatSk(timestamp),
+});
 
 export const createRustat = async (rustat: Rustat): Promise<void> => {
   await DynamoDBDocumentClient.put({
