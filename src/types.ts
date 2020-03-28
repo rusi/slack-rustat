@@ -85,6 +85,11 @@ export interface AddCommand extends BaseCommand {
   };
 }
 
+export interface AnnounceCommand extends BaseCommand {
+  command: RustatSubcommand.Announce;
+  payload: null;
+}
+
 export interface ClearCommand extends BaseCommand {
   command: RustatSubcommand.Clear;
   payload: null;
@@ -124,6 +129,7 @@ export interface UnknownCommand extends BaseCommand {
 
 export type ParsedSubcommand =
   | AddCommand
+  | AnnounceCommand
   | ClearCommand
   | HelpCommand
   | ListCommand

@@ -1,6 +1,7 @@
 import { RustatCommand, RustatSubcommand, RUSTAT_SUBCOMMANDS } from './constants';
 import {
   AddCommand,
+  AnnounceCommand,
   ClearCommand,
   HelpCommand,
   ListCommand,
@@ -36,6 +37,13 @@ export const parseSubcommand = (mainCommand: RustatCommand, commandText = ''): P
             key,
             message,
           },
+        };
+        return subcommand;
+      }
+      case RustatSubcommand.Announce: {
+        const subcommand: AnnounceCommand = {
+          command,
+          payload: null,
         };
         return subcommand;
       }

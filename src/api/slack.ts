@@ -2,7 +2,7 @@ import { App, AuthorizeResult, AuthorizeSourceData, ExpressReceiver } from '@sla
 import chrono from 'chrono-node';
 import { format } from 'date-fns';
 import serverless from 'serverless-http';
-import { HELP_TEXT, RustatCommand, RustatSubcommand } from '../constants';
+import { HELP_TEXT, HISTORY_TEXT, RustatCommand, RustatSubcommand } from '../constants';
 import { parseSubcommand } from '../helper';
 import * as RustatService from '../services/rustat';
 import * as InstallationService from '../services/installation';
@@ -77,6 +77,14 @@ app.command('/rustat', async ({ ack: respond, command }) => {
           text: 'Error saving rustat',
         });
       }
+      break;
+    }
+    case RustatSubcommand.Announce: {
+      respond({
+        // eslint-disable-next-line @typescript-eslint/camelcase
+        response_type: 'in_channel',
+        text: HISTORY_TEXT,
+      });
       break;
     }
     case RustatSubcommand.Help: {
