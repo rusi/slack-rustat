@@ -1,6 +1,5 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import request from 'request-promise-native';
-import { makeInstallationPk, makeInstallationSk } from '../helper';
 import * as InstallationService from '../services/installation';
 import { Installation, OAuthResult } from '../types';
 import { createSuccessResponse, createErrorResponse } from './response';
@@ -48,8 +47,8 @@ export const handler: APIGatewayProxyHandler = async event => {
 
     const enterpriseId = enterprise ? enterprise.id : null;
     const installation: Installation = {
-      PK: makeInstallationPk(enterpriseId, teamId),
-      SK: makeInstallationSk(userId),
+      PK: InstallationService.makeInstallationPk(enterpriseId, teamId),
+      SK: InstallationService.makeInstallationSk(userId),
       appId,
       botAccessToken,
       botId: botUserId,
