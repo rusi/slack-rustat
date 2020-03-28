@@ -261,7 +261,7 @@ app.command('/rusi', async ({ ack: respond, client, command, payload }) => {
             nowWithUserTzOffset
           )}`
         );
-        const expiryDate: Date | null = chrono.parseDate(expiryString, nowWithUserTzOffset, { forwardDate: true });
+        let expiryDate: Date | null = chrono.parseDate(expiryString, nowWithUserTzOffset, { forwardDate: true });
         if (expiryDate) {
           console.log(
             `Parsed expiry from "${expiryString}": ${expiryDate.toISOString()} => ${dateToSec(
@@ -269,7 +269,19 @@ app.command('/rusi', async ({ ack: respond, client, command, payload }) => {
             )}; Reference time: ${nowWithUserTzOffset.toISOString()} => ${dateToSec(nowWithUserTzOffset)}`
           );
         } else {
-          console.log(`Failed parsing "${expiryString}"!`);
+          // fallback parsing as minutes
+          const expiryMinutes = parseInt(expiryString, 10);
+          if (!isNaN(expiryMinutes)) {
+            const now = new Date();
+            expiryDate = new Date((dateToSec(now) + expiryMinutes * 60) * 1000);
+            console.log(
+              `Parsed expiry minutes from "${expiryString}": ${expiryDate.toISOString()} => ${dateToSec(
+                expiryDate
+              )}; Reference time: ${now.toISOString()} => ${dateToSec(now)}`
+            );
+          } else {
+            console.log(`Failed parsing "${expiryString}"!`);
+          }
         }
         const expiryTimestamp = expiryDate ? dateToSec(expiryDate) : undefined;
 
@@ -286,12 +298,14 @@ app.command('/rusi', async ({ ack: respond, client, command, payload }) => {
           user,
         });
 
-        const rawDateWithoutTz = new Date((dateToSec(expiryDate) + tzOffsetSeconds) * 1000);
+        const rawDateWithoutTz: Date | null = expiryDate
+          ? new Date((dateToSec(expiryDate) + tzOffsetSeconds) * 1000)
+          : null;
         respond({
           // eslint-disable-next-line @typescript-eslint/camelcase
           response_type: 'ephemeral',
           text: `Successfully set active rustat to "${key}"${
-            expiryDate ? ` which expires on ${format(rawDateWithoutTz, 'PPpp')} ${tzLabel}` : ''
+            rawDateWithoutTz ? ` which expires on ${format(rawDateWithoutTz, 'PPpp')} ${tzLabel}` : ''
           }`,
         });
       } catch (e) {
