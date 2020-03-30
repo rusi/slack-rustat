@@ -82,6 +82,8 @@ app.command('/rustat', async ({ ack: respond, command }) => {
     case RustatSubcommand.Announce: {
       respond({
         // eslint-disable-next-line @typescript-eslint/camelcase
+        replace_original: true,
+        // eslint-disable-next-line @typescript-eslint/camelcase
         response_type: 'in_channel',
         text: HISTORY_TEXT,
       });
