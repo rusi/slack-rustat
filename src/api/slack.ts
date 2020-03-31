@@ -245,11 +245,14 @@ app.command('/rusi', async ({ ack: respond, client, command }) => {
         const dateToSec = (d: Date): number => msToSec(d.getTime());
         const zToTz = (d: Date, tzOffsetSeconds = 0): Date => {
           const offsetDate = new Date((dateToSec(d) + tzOffsetSeconds) * 1000);
-          const tzString = String((tzOffsetSeconds * 100) / 3600).padStart(4, '0');
-          const dateWithTzString = offsetDate.toISOString().replace('Z', `+${tzString}`);
+          const tzSign = tzOffsetSeconds < 0 ? '-' : '+';
+          const tzHour = String((Math.abs(tzOffsetSeconds) * 100) / 3600).padStart(4, '0');
+          const tzString = tzOffsetSeconds !== 0 ? `${tzSign}${tzHour}` : 'Z';
+          const dateWithTzString = offsetDate.toISOString().replace('Z', `${tzString}`);
+          console.log(`Converting ${d.toISOString()} to TZ ${tzString} // TZ offset sec ${tzOffsetSeconds}...`);
           const result = new Date(dateWithTzString);
           console.log(
-            `Converting ${d.toISOString()} to TZ ${tzString} => ${result.toISOString()} == ${dateWithTzString} // TZ offset sec ${tzOffsetSeconds}`
+            `Converted ${d.toISOString()} to TZ ${tzString} => ${result.toISOString()} == ${dateWithTzString} // TZ offset sec ${tzOffsetSeconds}`
           );
           return result;
         };
@@ -308,6 +311,7 @@ app.command('/rusi', async ({ ack: respond, client, command }) => {
           }`,
         });
       } catch (e) {
+        console.error(e);
         respond({
           // eslint-disable-next-line @typescript-eslint/camelcase
           response_type: 'ephemeral',
