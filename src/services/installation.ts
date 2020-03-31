@@ -4,8 +4,8 @@ import { Installation } from '../types';
 
 const INSTALLATIONS_TABLE_NAME = process.env.INSTALLATIONS_TABLE_NAME || 'installations';
 
-export const makeInstallationPk = (enterpriseId: string, teamId: string): string => `PK#${enterpriseId}#${teamId}`;
-export const makeInstallationSk = (userId: string): string => `#SK#${userId}`;
+export const makeInstallationPk = (teamId: string): string => `PK#${teamId}`;
+export const makeInstallationSk = (enterpriseId: string): string => `#SK#${enterpriseId}`;
 
 export const saveInstallation = async (installation: Installation): Promise<void> => {
   await DynamoDBDocumentClient.put({
@@ -21,17 +21,13 @@ export const deleteInstallation = async (installation: Installation): Promise<vo
   }).promise();
 };
 
-export const listInstallations = async (
-  enterpriseId: string = null,
-  teamId: string,
-  userId: string
-): Promise<QueryOutput> => {
+export const listInstallations = async (teamId: string, enterpriseId: string = null): Promise<QueryOutput> => {
   const response = await DynamoDBDocumentClient.query({
     TableName: INSTALLATIONS_TABLE_NAME,
     KeyConditionExpression: 'PK = :pk AND SK >= :key',
     ExpressionAttributeValues: {
-      ':pk': makeInstallationPk(enterpriseId, teamId),
-      ':key': makeInstallationSk(userId),
+      ':pk': makeInstallationPk(teamId),
+      ':key': makeInstallationSk(enterpriseId),
     },
   }).promise();
 

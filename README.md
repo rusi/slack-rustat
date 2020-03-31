@@ -113,9 +113,9 @@ npm run start:offline
 
 Slack workspace installations
 
-| Entity         | Hash                           | Range           |
-|----------------|--------------------------------|-----------------|
-| `installation` | `PK#<enterprise_id>#<team_id>` | `#SK#<user_id>` |
+| Entity         | Hash           | Range                 |
+|----------------|----------------|-----------------------|
+| `installation` | `PK#<team_id>` | `#SK#<enterprise_id>` |
 
 #### `rustats`
 
