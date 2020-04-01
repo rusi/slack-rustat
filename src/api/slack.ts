@@ -8,9 +8,9 @@ import * as RustatService from '../services/rustat';
 import * as InstallationService from '../services/installation';
 import { AuthTokens, Rustat } from '../types';
 
-const authorizeFn = async ({ enterpriseId, teamId }: AuthorizeSourceData): Promise<AuthorizeResult> => {
+const authorizeFn = async ({ enterpriseId, teamId, userId }: AuthorizeSourceData): Promise<AuthorizeResult> => {
   // check wherever you've stored the tokens and get the values based on teamId and/or userId
-  const result = await InstallationService.listInstallations(teamId, enterpriseId);
+  const result = await InstallationService.listInstallations(enterpriseId, teamId, userId);
   if (result && result.Count > 0) {
     const { botId, userAccessToken: userToken } = result.Items[0] as AuthTokens;
     return {

@@ -47,8 +47,8 @@ export const handler: APIGatewayProxyHandler = async event => {
 
     const enterpriseId = enterprise ? enterprise.id : null;
     const installation: Installation = {
-      PK: InstallationService.makeInstallationPk(teamId),
-      SK: InstallationService.makeInstallationSk(enterpriseId),
+      PK: InstallationService.makeInstallationPk(enterpriseId, teamId),
+      SK: InstallationService.makeInstallationSk(userId),
       appId,
       botAccessToken,
       botId: botUserId,
