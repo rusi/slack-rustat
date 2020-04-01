@@ -16,6 +16,9 @@ export enum RustatSubcommand {
 
 export const RUSTAT_SUBCOMMANDS = Object.values(RustatSubcommand);
 
+export const REQUEST_ACCESS_URL = `https://slack.com/oauth/v2/authorize?client_id=${process.env.SLACK_CLIENT_ID}&scope=chat:write,commands,incoming-webhook,users.profile:read&user_scope=users.profile:read,users.profile:write,users:read`;
+export const REQUEST_ACCESS_MESSAGE = `_You need to <${REQUEST_ACCESS_URL}|authorize The Rustat Hristov Slack bot> so it can set your status for you._`;
+
 export const HELP_TEXT = `Welcome to :sparkles:*The Rustat Hristov Slack bot*:sparkles:!
 
 A "rustat" is a predefined :sparkles:fancy status message:sparkles:. ~It can also mean "R. U. status", that is, "Are you <status>?", like "Are you \`lunch\`?"~ NOPE.
@@ -30,6 +33,8 @@ A "rustat" is a predefined :sparkles:fancy status message:sparkles:. ~It can als
 *Set your status message*
 \`/rusi <key> [<expiry>]\` -- Activate the rustat with the shortcut keyword \`<key>\` that will (optionally) automatically be cleared by \`<expiry\` (_<https://github.com/wanasit/chrono|in human language!>_); e.g. \`/rusi lunch\`, \`/rusi sleep until 10pm\`, \`/rusi meeting for 30 minutes\` or \`/rusi call until 2am EST\`
 \`/rusi clear\` -- Clear your current status message (whether it's a rustat or not)
+
+${REQUEST_ACCESS_MESSAGE}
 `;
 
 export const HISTORY_TEXT = `_One day..._

@@ -2,7 +2,7 @@ import { App, AuthorizeResult, AuthorizeSourceData, ExpressReceiver } from '@sla
 import chrono from 'chrono-node';
 import { format } from 'date-fns';
 import serverless from 'serverless-http';
-import { HELP_TEXT, HISTORY_TEXT, RustatCommand, RustatSubcommand } from '../constants';
+import { HELP_TEXT, HISTORY_TEXT, REQUEST_ACCESS_MESSAGE, RustatCommand, RustatSubcommand } from '../constants';
 import { parseSubcommand } from '../helper';
 import * as RustatService from '../services/rustat';
 import * as InstallationService from '../services/installation';
@@ -312,17 +312,31 @@ app.command('/rusi', async ({ ack: respond, client, command }) => {
         });
       } catch (e) {
         console.error(e);
-        respond({
-          // eslint-disable-next-line @typescript-eslint/camelcase
-          response_type: 'ephemeral',
-          attachments: [
-            {
-              color: '#ff0000',
-              text: e.message,
-            },
-          ],
-          text: 'Error setting active rustat',
-        });
+        if (String(e.message).includes('invalid_user')) {
+          respond({
+            // eslint-disable-next-line @typescript-eslint/camelcase
+            response_type: 'ephemeral',
+            attachments: [
+              {
+                color: '#ff0000',
+                text: REQUEST_ACCESS_MESSAGE,
+              },
+            ],
+            text: 'Error setting active rustat',
+          });
+        } else {
+          respond({
+            // eslint-disable-next-line @typescript-eslint/camelcase
+            response_type: 'ephemeral',
+            attachments: [
+              {
+                color: '#ff0000',
+                text: e.message,
+              },
+            ],
+            text: 'Error setting active rustat',
+          });
+        }
       }
       break;
     }
