@@ -186,6 +186,11 @@ app.command('/rusi', async ({ ack: respond, client, command }) => {
           user,
         });
 
+        await client.users.setPresence.set({
+          presence: "auto",
+          user,
+        });
+
         respond({
           // eslint-disable-next-line @typescript-eslint/camelcase
           response_type: 'ephemeral',
@@ -297,6 +302,11 @@ app.command('/rusi', async ({ ack: respond, client, command }) => {
         console.log(profile, dateToSec(new Date()));
         await client.users.profile.set({
           profile,
+          user,
+        });
+
+        await client.users.setPresence.set({
+          presence: "away",
           user,
         });
 
